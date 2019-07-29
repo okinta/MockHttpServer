@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="MSBuild.Sdk.Extras">
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard2.0;uap10.0.16299</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
     <Description>A library to help with unit/accpetance tests of code that relies on an external HTTP service, by allowing you to easily mock one.</Description>
     <Company>AgileData Software</Company>
     <PackageTags>http;mock</PackageTags>
