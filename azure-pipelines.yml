@@ -1,0 +1,113 @@
+trigger:
+- master
+
+name: $(Build.BuildId)
+
+variables:
+- name: BuildPlatform
+  value: 'Any CPU'
+- name: BuildConfiguration
+  value: 'Release'
+- group: CodeSigning
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    displayName: Build Toolkit
+    pool:
+      vmImage: windows-2019
+    steps:
+    - task: NuGetToolInstaller@0
+      displayName: Use NuGet 5.1.0
+      inputs:
+        versionSpec: 5.1.0
+
+    - task: NuGetCommand@2
+      displayName: 'NuGet restore'
+      inputs:
+        noCache: true
+
+    - task: MSBuild@1
+      displayName: Build solution **/*.sln
+      inputs:
+        platform: '$(BuildPlatform)'
+        configuration: '$(BuildConfiguration)'
+
+    - task: VSTest@2
+      displayName: VsTest - testAssemblies
+      inputs:
+        codeCoverageEnabled: true
+        rerunFailedTests: true
+
+    - task: PublishPipelineArtifact@0
+      displayName: 'Publish Package Artifacts'
+      inputs:
+        artifactName: NuGet
+        targetPath: $(Build.ArtifactStagingDirectory)
+
+- stage: deploy
+  displayName: Deploy NuGet
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  jobs:
+  - deployment: NuGet
+    displayName: NuGet.org
+    environment: NuGet
+    condition: and(succeeded(), or(eq(variables['IS_PREVIEW'], true), eq(variables['IS_RELEASE'], true)))
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - powershell: |
+             try {
+                 $artifactDirectory = $env:PIPELINE_WORKSPACE
+                 Write-Host "Currect working directory $artifactDirectory"
+                 $nupkg = Get-ChildItem -Path $artifactDirectory -Filter *.nupkg -Recurse | Select-Object -First 1
+
+                 if($null -eq $nupkg) {
+                     Throw "No NuGet Package could be found in the current directory"
+                 }
+
+                 Write-Host "Package Name $($nupkg.Name)"
+                 $nupkg.Name -match '^(.*?)\.((?:\.?[0-9]+){3,}(?:[-a-z]+)?)\.nupkg$'
+
+                 $VersionName = $Matches[2]
+                 $IsPreview = $VersionName -match '-pre$'
+                 $ReleaseDisplayName = $VersionName
+
+                 if($null -eq $env:IS_PREVIEW) {
+                     Write-Output ("##vso[task.setvariable variable=IS_PREVIEW;]$IsPreview")
+                 }
+
+                 if($true -eq $IsPreview) {
+                     $ReleaseDisplayName = "$VersionName - Preview"
+                 }
+
+                 Write-Host "Version Name" $VersionName
+                 Write-Host "Release Display Name $ReleaseDisplayName"
+                 Write-Output ("##vso[task.setvariable variable=VersionName;]$VersionName")
+                 Write-Output ("##vso[task.setvariable variable=ReleaseDisplayName;]$ReleaseDisplayName")
+             }
+             catch {
+                 Write-Error  $_
+                 exit 1
+             }
+            displayName: Process Artifacts for Deployment
+          - task: GithubRelease@0 
+            displayName: 'Create GitHub Release'
+            inputs:
+              gitHubConnection: GitHub
+              title: '$(ReleaseDisplayName)'
+              tagSource: manual
+              tag: 'v$(VersionName)'
+              isPreRelease: $(IS_PREVIEW)
+              assets: '$(Pipeline.Workspace)/**/*.nupkg'
+              addChangeLog: true
+              isDraft: true
+          - task: NuGetCommand@2
+            displayName: NuGet Push
+            inputs:
+              command: push
+              packagesToPush: '$(Pipeline.Workspace)/**/*.nupkg;!$(Pipeline.Workspace)/**/*.symbols.nupkg'
+              nuGetFeedType: external
+              publishFeedCredentials: 'NuGet'

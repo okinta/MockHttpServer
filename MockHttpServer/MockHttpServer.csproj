@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="MSBuild.Sdk.Extras">
   <PropertyGroup>
+    <PackageId>AP.MockHttpServer</PackageId>
     <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
     <Description>A library to help with unit/accpetance tests of code that relies on an external HTTP service, by allowing you to easily mock one.</Description>
     <Company>AgileData Software</Company>
