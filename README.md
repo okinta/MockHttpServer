@@ -1,12 +1,14 @@
 # MockHttpServer
 
-[![Build status](https://ci.appveyor.com/api/projects/status/numsjbmqdxpercff?svg=true)](https://ci.appveyor.com/project/jrharmon/mockhttpserver)
-[![NuGet Version](http://img.shields.io/nuget/v/MockHttpServer.svg?style=flat)](https://www.nuget.org/packages/MockHttpServer/)
+This is a fork of the MockHttpServer from [Jeffrey Harmon](https://github.com/jrharmon/MockHttpServer). This fork provides the .NET Standard/.NET Core support to allow use with more modern libraries where testing with the full .NET framework is not always an option. This library is also strongly named.
+
+[![Build Status](https://dev.azure.com/avantipoint/CrossPlatform/_apis/build/status/dansiegel.MockHttpServer?branchName=master)](https://dev.azure.com/avantipoint/CrossPlatform/_build/latest?definitionId=58&branchName=master)
+[![NuGet Version](http://img.shields.io/nuget/v/AP.MockHttpServer.svg?style=flat)](https://www.nuget.org/packages/AP.MockHttpServer/)
 
 A library to help with unit/acceptance tests of code that relies on an external HTTP service, by allowing you to
 easily mock one.
 
-It can easily be installed through NuGet, using the [MockHttpServer](http://nuget.org/packages/MockHttpServer) package.
+It can easily be installed through NuGet, using the [AP.MockHttpServer](http://nuget.org/packages/AP.MockHttpServer) package.
 
 ## Table of Contents
 
