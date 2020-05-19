@@ -17,7 +17,16 @@ namespace MockHttpServer
         private Task _handleRequestsTask;
         private const int ListenerStoppedErrorCode = 995;
 
-        public IReadOnlyList<MockHttpHandler> RequestHandlers => _requestHandlers;
+        public IReadOnlyList<MockHttpHandler> RequestHandlers
+        {
+            get
+            {
+                lock (_requestHandlersLock)
+                {
+                    return new List<MockHttpHandler>(_requestHandlers);
+                }
+            }
+        }
 
         public int Port { get; }
 
