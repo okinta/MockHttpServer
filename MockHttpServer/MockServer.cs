@@ -14,7 +14,6 @@ namespace MockHttpServer
         private List<MockHttpHandler> _requestHandlers;
         private readonly object _requestHandlersLock = new object();
         private readonly Action<HttpListenerRequest, HttpListenerResponse, Dictionary<string, string>> _preHandler; //if set, this will be executed for every request before the handler is called
-        private readonly string _hostName; //the hostname to listen on.  defaults to localhost, but if you run as admin, you can use * or + as wild cards.  if a port is registered by netsh with a * or +, you can specify it in the constructor to use the wildcard without admin rights
         private Task _handleRequestsTask;
         private const int ListenerStoppedErrorCode = 995;
 
@@ -44,13 +43,12 @@ namespace MockHttpServer
         {
             _requestHandlers = requestHandlers.ToList(); //make a copy of the items, in case they get cleared later
             _preHandler = preHandler;
-            _hostName = hostName;
 
             Port = port > 0 ? port : GetRandomUnusedPort();
 
             //create and start listener
             _listener = new HttpListener();
-            _listener.Prefixes.Add($"http://{_hostName}:{Port}/");
+            _listener.Prefixes.Add($"http://{hostName}:{Port}/");
             _listener.Start();
 
             _handleRequestsTask = Task.Run(HandleRequests);
