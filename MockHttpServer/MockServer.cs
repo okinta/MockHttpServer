@@ -15,6 +15,7 @@ namespace MockHttpServer
         private readonly object _requestHandlersLock = new object();
         private readonly Action<HttpListenerRequest, HttpListenerResponse, Dictionary<string, string>> _preHandler; //if set, this will be executed for every request before the handler is called
         private readonly string _hostName; //the hostname to listen on.  defaults to localhost, but if you run as admin, you can use * or + as wild cards.  if a port is registered by netsh with a * or +, you can specify it in the constructor to use the wildcard without admin rights
+        private readonly Task _handleRequestsTask;
 
         public IReadOnlyList<MockHttpHandler> RequestHandlers => _requestHandlers;
 
@@ -51,10 +52,7 @@ namespace MockHttpServer
             _listener.Prefixes.Add($"http://{_hostName}:{Port}/");
             _listener.Start();
 
-// Cannot await Async Call in a Constructor
-#pragma warning disable 4014
-            HandleRequests();
-#pragma warning restore 4014
+            _handleRequestsTask = Task.Run(HandleRequests);
         }
 
         #region Private Methods
@@ -185,6 +183,11 @@ namespace MockHttpServer
             if (disposing && (_listener?.IsListening ?? false))
             {
                 _listener.Stop();
+            }
+
+            if (disposing && (_handleRequestsTask?.IsCompleted ?? false))
+            {
+                _handleRequestsTask.GetAwaiter().GetResult();
             }
         }
 
