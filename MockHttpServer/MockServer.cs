@@ -15,7 +15,8 @@ namespace MockHttpServer
         private readonly object _requestHandlersLock = new object();
         private readonly Action<HttpListenerRequest, HttpListenerResponse, Dictionary<string, string>> _preHandler; //if set, this will be executed for every request before the handler is called
         private readonly string _hostName; //the hostname to listen on.  defaults to localhost, but if you run as admin, you can use * or + as wild cards.  if a port is registered by netsh with a * or +, you can specify it in the constructor to use the wildcard without admin rights
-        private readonly Task _handleRequestsTask;
+        private Task _handleRequestsTask;
+        private const int ListenerStoppedErrorCode = 995;
 
         public IReadOnlyList<MockHttpHandler> RequestHandlers => _requestHandlers;
 
@@ -134,8 +135,9 @@ namespace MockHttpServer
             }
             catch (HttpListenerException ex)
             {
-                //when the listener is stopped, it will throw an exception for being cancelled, so just ignore it
-                if (ex.Message != "The I/O operation has been aborted because of either a thread exit or an application request")
+                // When the listener is stopped, it will throw an exception for being
+                // cancelled, so just ignore it
+                if (ex.ErrorCode != ListenerStoppedErrorCode)
                     throw;
             }
         }
@@ -175,19 +177,28 @@ namespace MockHttpServer
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing && (_listener?.IsListening ?? false))
+            if (!disposing) return;
+
+            try
             {
                 _listener.Stop();
+                _listener = null;
+            }
+            catch (ObjectDisposedException)
+            {
             }
 
-            if (disposing && (_handleRequestsTask?.IsCompleted ?? false))
+            try
             {
                 _handleRequestsTask.GetAwaiter().GetResult();
+                _handleRequestsTask = null;
+            }
+            catch (ObjectDisposedException)
+            {
             }
         }
 
