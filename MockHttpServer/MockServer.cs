@@ -77,8 +77,8 @@ namespace MockHttpServer
 
                     try
                     {
-                        //determine the hanlder
-                        Dictionary<string, string> parameters = null;
+                        //determine the handler
+                        var parameters = new Dictionary<string, string>();
                         MockHttpHandler handler;
                         lock (_requestHandlersLock)
                         {
@@ -86,7 +86,7 @@ namespace MockHttpServer
                         }
 
                         //run the shared pre-handler
-                        _preHandler?.Invoke(context.Request, context.Response, parameters ?? new Dictionary<string, string>());
+                        _preHandler?.Invoke(context.Request, context.Response, parameters);
 
                         //get the response string
                         string responseString = null;
