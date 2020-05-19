@@ -1,9 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <PackageId>AP.MockHttpServer</PackageId>
+    <PackageId>AT.MockHttpServer</PackageId>
     <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
     <Description>A library to help with unit/accpetance tests of code that relies on an external HTTP service, by allowing you to easily mock one.</Description>
     <Company>AgileData Software</Company>
     <PackageTags>http;mock</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Version>1.6.1</Version>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 </Project>
