@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="MSBuild.Sdk.Extras">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>AP.MockHttpServer</PackageId>
     <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
@@ -7,8 +6,4 @@
     <Company>AgileData Software</Company>
     <PackageTags>http;mock</PackageTags>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="all" />
-  </ItemGroup>
 </Project>
